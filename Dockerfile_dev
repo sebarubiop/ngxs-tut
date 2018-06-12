@@ -1,0 +1,20 @@
+
+# base image
+FROM node:8.11-alpine
+
+# set working directory
+WORKDIR /ng-app
+
+# add `/usr/src/app/node_modules/.bin` to $PATH
+# ENV PATH /usr/src/app/node_modules/.bin:$PATH
+
+RUN rm -rf node_modules && yarn config set depth 0 && yarn cache clean --force
+
+COPY . /ng-app
+
+## Storing node modules on a separate layer will prevent unnecessary yarn installs at each build
+RUN yarn install && cp -R ./node_modules ./ng-app
+
+EXPOSE 4200/tcp
+
+CMD ["yarn", "start", "--", "--host", "0.0.0.0", "--poll", "500"]
